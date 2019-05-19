@@ -3,6 +3,7 @@
   <title>Humidity/Temperature overview</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='Chart.min.css') }}">
   <script src="{{ url_for('static', filename='Chart.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='chartjs-plugin-annotation.min.js') }}"></script>
 </head>
 <body>
 <canvas id="humidityChart" width="800" height="400"></canvas>
@@ -47,7 +48,21 @@ var humidChart = new Chart(humidCtx, {
         }
       }]
     },
-    legend: legend
+    legend: legend,
+    annotation: {
+      annotations: [{
+        type: 'line',
+        mode: 'horizontal',
+        scaleID: 'y-axis-0',
+        value: 40,
+        borderColor: '#eb6123',
+        borderWidth: 1,
+        borderDash: [2, 2],
+        label: {
+          enabled: false,
+        }
+      }]
+    }
   }
 });
 </script>
