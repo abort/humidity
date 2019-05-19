@@ -1,7 +1,9 @@
 import os
 
-from flask import Flask
+from flask import Flask, g, redirect, render_template, request, url_for
 from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
+from random import randint
 
 def create_app(test_config=None):
     # create and configure the app
@@ -24,23 +26,26 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    def read_sensors():
-        return 1
-
-    sched = BackgroundScheduler(daemon=True)
-    sched.add_job(read_sensors, 'interval', minutes=60)
-    sched.start()
-
-            
-    # Shutdown your cron thread if the web process is stopped
-    atexit.register(lambda: cron.shutdown(wait=False))
-
-    # a simple page that says hello
-    @app.route('/')
-    def main():
-        return 'Hello, World!'
-
     from . import db
     db.init_app(app)
+
+    from flaskr import chart
+    app.register_blueprint(chart.bp)
+    app.add_url_rule("/", endpoint="index")
+
+    def read_sensors():
+        with app.app_context():
+            humidity = randint(0, 80)
+            temperature = randint(-20, 50)
+            d = db.get_db()
+            d.execute(
+                'INSERT INTO sensor_data (temperature, humidity) VALUES (?, ?)',
+                (temperature, humidity)
+            )
+            d.commit()
+
+    sched = BackgroundScheduler(daemon=True)
+    sched.add_job(read_sensors, 'interval', minutes=30)
+    sched.start()
 
     return app
