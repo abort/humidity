@@ -46,7 +46,7 @@ def is_raspberry_pi(raise_on_errors=False):
 
     return True
 
-def read_sensors():
+def read_sensor_data():
     import Adafruit_DHT
     humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, 3)
     return humidity, temperature
@@ -93,7 +93,6 @@ def create_app(test_config=None):
 
     print("Running on {}".format("rpi" if is_pi else platform.system()))
 
-    read_function = read_sensors if is_pi else generate_sensor_data
     threshold = 40
 
     if telegram_enabled:
@@ -105,6 +104,7 @@ def create_app(test_config=None):
 
     telegram = telegram_enabled and telegram_token and telegram_chatid
 
+    read_function = read_sensor_data if is_pi else generate_sensor_data
     def read_sensors():
         with app.app_context():
             humidity, temperature = read_function()
@@ -133,3 +133,6 @@ def create_app(test_config=None):
     print("Started with polling interval {} seconds and telegram {}".format(polling_interval, "enabled" if telegram else "disabled"))
 
     return app
+
+if __name__ == '__main__':
+    create_app().run(debug = False, host = '0.0.0.0')
