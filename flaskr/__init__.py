@@ -89,6 +89,8 @@ def create_app(test_config=None):
     telegram_chatid = os.environ.get("TELEGRAM_CHATID", default=None)
     polling_interval = int(os.environ.get("POLLING_INTERVAL", default=1800))
     threshold = int(os.environ.get("THRESHOLD", default=40))
+    
+    app.config['THRESHOLD'] = threshold
 
     is_pi = is_raspberry_pi()
 

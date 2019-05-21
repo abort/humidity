@@ -54,9 +54,7 @@ var humidChart = new Chart(humidCtx, {
         type: 'line',
         mode: 'horizontal',
         scaleID: 'y-axis-0',
-        {% if threshold is not none %}
-          value: {{ threshold }},
-        {% endif %}
+        {% if threshold is not none %} value: {{ threshold }}, {% endif %}
         borderColor: '#eb6123',
         borderWidth: 1,
         borderDash: [2, 2],

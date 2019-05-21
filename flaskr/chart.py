@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for, current_app as app
 from flaskr.db import get_db
 
 from datetime import datetime
@@ -15,4 +15,4 @@ def index():
 	humidities = [row['humidity'] for row in sensor_data]
 	temperatures = [row['temperature'] for row in sensor_data]
 
-	return render_template('index.html', dates = created, humidities = humidities, temperatures = temperatures, g.pop('threshold', None))
+	return render_template('index.html', dates = created, humidities = humidities, temperatures = temperatures, threshold = app.config['THRESHOLD'])
