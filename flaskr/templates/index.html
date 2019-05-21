@@ -54,7 +54,9 @@ var humidChart = new Chart(humidCtx, {
         type: 'line',
         mode: 'horizontal',
         scaleID: 'y-axis-0',
-        value: 40,
+        {% if threshold is not none %}
+          value: {{ threshold }},
+        {% endif %}
         borderColor: '#eb6123',
         borderWidth: 1,
         borderDash: [2, 2],
@@ -89,8 +91,8 @@ var tempChart = new Chart(tempCtx, {
       xAxes: xAxes,
       yAxes: [{
         ticks: {
-            max: 60,
-            min: -20,
+            max: 40,
+            min: 0,
             stepSize: 5
         }
       }]

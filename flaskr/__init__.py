@@ -88,12 +88,12 @@ def create_app(test_config=None):
     telegram_token = os.environ.get("TELEGRAM_TOKEN", default=None)
     telegram_chatid = os.environ.get("TELEGRAM_CHATID", default=None)
     polling_interval = int(os.environ.get("POLLING_INTERVAL", default=1800))
+    threshold = int(os.environ.get("THRESHOLD", default=40))
 
     is_pi = is_raspberry_pi()
 
     print("Running on {}".format("rpi" if is_pi else platform.system()))
 
-    threshold = 40
 
     if telegram_enabled:
         if not telegram_token:

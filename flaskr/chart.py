@@ -15,4 +15,4 @@ def index():
 	humidities = [row['humidity'] for row in sensor_data]
 	temperatures = [row['temperature'] for row in sensor_data]
 
-	return render_template('index.html', dates = created, humidities = humidities, temperatures = temperatures)
+	return render_template('index.html', dates = created, humidities = humidities, temperatures = temperatures, g.pop('threshold', None))
