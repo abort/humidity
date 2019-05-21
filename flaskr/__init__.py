@@ -4,6 +4,57 @@ from flask import Flask, g, redirect, render_template, request, url_for
 from apscheduler.schedulers.background import BackgroundScheduler
 from random import randint
 import requests
+import platform
+import io
+
+
+def is_raspberry_pi(raise_on_errors=False):
+    """Checks if Raspberry PI"""
+    try:
+        with io.open('/proc/cpuinfo', 'r') as cpuinfo:
+            found = False
+            for line in cpuinfo:
+                if line.startswith('Hardware'):
+                    found = True
+                    label, value = line.strip().split(':', 1)
+                    value = value.strip()
+                    if value not in (
+                        'BCM2708',
+                        'BCM2709',
+                        'BCM2835',
+                        'BCM2836'
+                    ):
+                        if raise_on_errors:
+                            raise ValueError(
+                                'This system does not appear to be a '
+                                'Raspberry Pi.'
+                            )
+                        else:
+                            return False
+            if not found:
+                if raise_on_errors:
+                    raise ValueError(
+                        'Unable to determine if this system is a Raspberry Pi.'
+                    )
+                else:
+                    return False
+    except IOError:
+        if raise_on_errors:
+            raise ValueError('Unable to open `/proc/cpuinfo`.')
+        else:
+            return False
+
+    return True
+
+def read_sensors():
+    import Adafruit_DHT
+    humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, 3)
+    return humidity, temperature
+
+def generate_sensor_data():
+    humidity = randint(0, 100)
+    temperature = randint(-20, 50)
+    return humidity, temperature    
 
 def create_app(test_config=None):
     # create and configure the app
@@ -37,6 +88,12 @@ def create_app(test_config=None):
     telegram_token = os.environ.get("TELEGRAM_TOKEN", default=None)
     telegram_chatid = os.environ.get("TELEGRAM_CHATID", default=None)
     polling_interval = int(os.environ.get("POLLING_INTERVAL", default=1800))
+
+    is_pi = is_raspberry_pi()
+
+    print("Running on {}".format("rpi" if is_pi else platform.system()))
+
+    read_function = read_sensors if is_pi else generate_sensor_data
     threshold = 40
 
     if telegram_enabled:
@@ -50,13 +107,14 @@ def create_app(test_config=None):
 
     def read_sensors():
         with app.app_context():
-            # TODO: read sensors
-            humidity = randint(0, 100)
-            temperature = randint(-20, 50)
+            humidity, temperature = read_function()
+            if not humidity or not temperature:
+                print("Warning: failed to read humidity and temperature")
+                return
             d = db.get_db()
             d.execute(
                 'INSERT INTO sensor_data (temperature, humidity) VALUES (?, ?)',
-                (temperature, humidity)
+                (int(temperature), int(humidity))
             )
             d.commit()
 
@@ -68,11 +126,10 @@ def create_app(test_config=None):
                 'text': 'Humidity is currently {}%, which is below the threshold of < {}%'.format(humidity, threshold)}
         requests.post('https://api.telegram.org/bot{}/sendMessage'.format(telegram_token), data = payload)
 
-
     sched = BackgroundScheduler(daemon=True)
     sched.add_job(read_sensors, 'interval', seconds=polling_interval)
     sched.start()
 
     print("Started with polling interval {} seconds and telegram {}".format(polling_interval, "enabled" if telegram else "disabled"))
-    
+
     return app
