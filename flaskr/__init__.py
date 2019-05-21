@@ -48,13 +48,13 @@ def is_raspberry_pi(raise_on_errors=False):
 
 def read_sensor_data():
     import Adafruit_DHT
-    humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, 3)
+    humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, 4)
     return humidity, temperature
 
 def generate_sensor_data():
     humidity = randint(0, 100)
     temperature = randint(-20, 50)
-    return humidity, temperature    
+    return humidity, temperature
 
 def create_app(test_config=None):
     # create and configure the app
@@ -134,5 +134,5 @@ def create_app(test_config=None):
 
     return app
 
-if __name__ == '__main__':
-    create_app().run(debug = False, host = '0.0.0.0')
+#if __name__ == '__main__':
+#    create_app().run(debug = False, host = '0.0.0.0')
