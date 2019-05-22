@@ -12,12 +12,11 @@ def index():
 		return dt.day
 
 	db = get_db()
-	qry = 'SELECT * FROM (SELECT created, humidity, temperature FROM sensor_data ORDER BY created ASC limit 144) ORDER BY created ASC'
+	qry = 'SELECT * FROM (SELECT created, humidity, temperature FROM sensor_data ORDER BY created ASC limit 72) ORDER BY created ASC'
 	sensor_data = db.execute(qry).fetchall()
 
 	dates = [row['created'] for row in sensor_data]
 	grouped_dates = [ (day, list(values)) for day, values in groupby(dates, extract_day) ]
-	print("grouped dates {} data: {}".format(len(grouped_dates), str(grouped_dates)))
 	date_labels = [assign_time_label(list(values)) for day, values in grouped_dates]
 
 	date_labels = list(chain(*date_labels))

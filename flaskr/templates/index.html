@@ -14,7 +14,7 @@ var xAxes = [{
   display: true,
   position: 'bottom',
   ticks: {
-    maxTicksLimit: 25,
+    maxTicksLimit: 100,
     autoSkip: true,
     maxRotation: 90,
     minRotation: 90
@@ -29,7 +29,7 @@ var humidChart = new Chart(humidCtx, {
     labels: dateLabels,
     datasets: [{ 
         data: {{ humidities|tojson }},
-        borderColor: "#ff0000",
+        borderColor: "#3c6cb1",
         fill: false
       }]
   },
