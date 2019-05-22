@@ -7,6 +7,8 @@ import requests
 import platform
 import io
 
+def str2bool(v):
+  return v.lower() in ("yes", "true", "t", "1")
 
 def is_raspberry_pi(raise_on_errors=False):
     """Checks if Raspberry PI"""
@@ -52,8 +54,8 @@ def read_sensor_data():
     return humidity, temperature
 
 def generate_sensor_data():
-    humidity = randint(0, 100)
-    temperature = randint(-20, 50)
+    humidity = randint(1, 80)
+    temperature = randint(1, 40)
     return humidity, temperature
 
 def create_app(test_config=None):
@@ -84,7 +86,7 @@ def create_app(test_config=None):
     app.register_blueprint(chart.bp)
     app.add_url_rule("/", endpoint="index")
 
-    telegram_enabled = os.environ.get("TELEGRAM_ENABLED", default=False) 
+    telegram_enabled = str2bool(os.environ.get("TELEGRAM_ENABLED", default="f"))
     telegram_token = os.environ.get("TELEGRAM_TOKEN", default=None)
     telegram_chatid = os.environ.get("TELEGRAM_CHATID", default=None)
     polling_interval = int(os.environ.get("POLLING_INTERVAL", default=1800))
