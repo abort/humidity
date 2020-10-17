@@ -1,8 +1,8 @@
 import os
 
-from flask import Flask, g, redirect, render_template, request, url_for
+from flask import Flask, g, redirect, render_template, request, url_for, jsonify
 from apscheduler.schedulers.background import BackgroundScheduler
-from random import randint
+from random import uniform
 import requests
 import platform
 import io
@@ -51,12 +51,13 @@ def is_raspberry_pi(raise_on_errors=False):
 def read_sensor_data():
     import Adafruit_DHT
     humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, 4)
-    return humidity, temperature
+    return round(humidity, 2), round(temperature, 2)
 
 def generate_sensor_data():
-    humidity = randint(1, 80)
-    temperature = randint(1, 40)
-    return humidity, temperature
+    humidity = uniform(1, 80)
+    temperature = uniform(1, 40)
+    return round(humidity, 2), round(temperature, 2)
+
 
 def create_app(test_config=None):
     # create and configure the app
@@ -118,7 +119,7 @@ def create_app(test_config=None):
             d = db.get_db()
             d.execute(
                 'INSERT INTO sensor_data (temperature, humidity) VALUES (?, ?)',
-                (int(temperature), int(humidity))
+                (temperature, humidity)
             )
             d.commit()
 
@@ -136,6 +137,16 @@ def create_app(test_config=None):
 
     read_sensors()
     print("Started with polling interval {} seconds and telegram {}".format(polling_interval, "enabled" if telegram else "disabled"))
+
+    @app.route("/api", methods=['GET'])
+    def get_api():
+        qry = 'SELECT humidity, temperature FROM sensor_data ORDER BY id DESC limit 1'
+        sensor_data = db.get_db().execute(qry).fetchall()
+        result = dict()
+        if sensor_data and sensor_data[0]:
+            result['humidity'] = sensor_data[0][0]
+            result['temperature'] = sensor_data[0][1]
+        return jsonify(result)
 
     return app
 
