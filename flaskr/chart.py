@@ -12,7 +12,7 @@ def index():
 		return dt.day
 
 	db = get_db()
-	qry = 'SELECT * FROM (SELECT created, humidity, temperature FROM sensor_data ORDER BY created ASC limit 72) ORDER BY created ASC'
+	qry = 'SELECT * FROM (SELECT created, humidity, temperature FROM sensor_data ORDER BY created DESC limit 72) ORDER BY created ASC'
 	sensor_data = db.execute(qry).fetchall()
 
 	dates = [row['created'].replace(tzinfo=timezone.utc).astimezone(tz=None) for row in sensor_data]

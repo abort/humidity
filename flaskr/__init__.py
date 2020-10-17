@@ -134,6 +134,7 @@ def create_app(test_config=None):
     sched.add_job(read_sensors, 'interval', seconds=polling_interval)
     sched.start()
 
+    read_sensors()
     print("Started with polling interval {} seconds and telegram {}".format(polling_interval, "enabled" if telegram else "disabled"))
 
     return app
