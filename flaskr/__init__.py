@@ -51,6 +51,8 @@ def is_raspberry_pi(raise_on_errors=False):
 def read_sensor_data():
     import Adafruit_DHT
     humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, 4)
+    if not humidity or not temperature:
+        return None, None
     return round(humidity, 2), round(temperature, 2)
 
 def generate_sensor_data():
